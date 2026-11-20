@@ -77,5 +77,39 @@ see [capa.md](./assets/capa.md)
 
 | Event                                    | Local endpoint → remote endpoint     | Result  |
 | ---------------------------------------- | ------------------------------------ | ------- |
-| `TCP Reconnect` (4 events, ~0.5 s apart) | `windows10:49671` → `windows10:1010` | SUCCESS |
-| `TCP Disconnect`                         | `windows10:49671` → `windows10:1010` | SUCCESS |
+| `TCP Reconnect` (4 events, ~0.5 s apart) | `127.0.0.1:49671` → `127.0.0.1:1010` | SUCCESS |
+| `TCP Disconnect`                         | `127.0.0.1:49671` → `127.0.0.1:1010` | SUCCESS |
+
+## Remediation
+
+### Description
+
+`maltrack-remediate` is a Windows command-line tool that removes the `mal-track.exe` / `maltrack.exe` RAT and reverts the changes documented in the analysis.
+
+It kills any running process, and deletes any file on a fixed drive, whose size is 674,304 bytes and whose SHA-256 is `a164abbb6778e1378af208b4a3d4833c2b226c68452d2151fb14e2e01a578fdd`. It then reverts the documented changes:
+
+- Deletes `%USERPROFILE%\Documents\maltrack\` and `%APPDATA%\dclogs\`.
+- Deletes the `HKCU\SOFTWARE\DC3_FEXEC` key.
+- Deletes the `HKCU\…\Run\Mal-Track` value.
+- Restores `HKLM\…\Winlogon\Userinit` to `C:\Windows\system32\userinit.exe,` if it points to `maltrack.exe`.
+
+The four `ZoneMap` values the malware sets are printed but not changed, because their original data was never recorded.
+
+### Usage
+
+The tool only works on Windows and has no flags.
+
+Build it (cross-compiling from Linux works too):
+
+```
+go mod tidy
+GOOS=windows GOARCH=amd64 go build -o maltrack-remediate.exe .
+```
+
+Run it as the affected user from an elevated prompt:
+
+```
+maltrack-remediate.exe
+```
+
+Elevation is needed only to restore `Userinit`. It prints one line per action, and the exit code is `0` on success and `1` if any step failed.
