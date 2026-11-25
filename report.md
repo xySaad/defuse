@@ -31,11 +31,92 @@ On a machine outside a controlled environment, an attacker could run any command
 
 The removal program (`maltrack-remediate.exe`, written in Go) finds the malware by its file size and SHA-256, kills the running process, deletes every copy on disk, and removes the persistence and other changes the malware made to the system.
 
-Output of the program run in the VM, with the malware running:
 
+**Before (malware running):**
+```bat
+C:\Users\vboxuser
+λ tasklist | findstr /i maltrack
+maltrack.exe                  4484 Console                    1     12,404 K
+
+C:\Users\vboxuser
+λ reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+
+HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+    Microsoft Edge Update    REG_SZ    "C:\Users\vboxuser\AppData\Local\Microsoft\EdgeUpdate\1.3.315.17\MicrosoftEdgeUpdateCore.exe"
+    ZoomIt    REG_SZ    C:\Tools\sysinternals\ZoomIt64.exe
+    Mal-Track    REG_SZ    C:\Users\vboxuser\Documents\maltrack\maltrack.exe
+
+C:\Users\vboxuser
+λ dir /a "%USERPROFILE%\Documents\maltrack"
+ Volume in drive C has no label.
+ Volume Serial Number is 8A9B-2277
+
+ Directory of C:\Users\vboxuser\Documents\maltrack
+
+11/25/2026  11:31 AM    <DIR>          .
+11/25/2026  11:31 AM    <DIR>          ..
+06/08/2022  12:02 PM           674,304 maltrack.exe
+               1 File(s)        674,304 bytes
+               2 Dir(s)  23,591,710,720 bytes free
+
+C:\Users\vboxuser
+λ dir /a "%APPDATA%\dclogs"
+ Volume in drive C has no label.
+ Volume Serial Number is 8A9B-2277
+
+ Directory of C:\Users\vboxuser\AppData\Roaming\dclogs
+
+11/25/2026  11:31 AM    <DIR>          .
+11/25/2026  11:31 AM    <DIR>          ..
+11/25/2026  11:32 AM               624 2026-11-25-4.dc
+               1 File(s)            624 bytes
+               2 Dir(s)  23,591,710,720 bytes free
+
+C:\Users\vboxuser
+λ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Userinit
+
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    Userinit    REG_SZ    C:\Windows\system32\userinit.exe,
 ```
-[paste the console output here]
+
+**After running `maltrack-remediate.exe`:**
+```bat
+C:\Users\vboxuser
+λ tasklist | findstr /i maltrack
+
+C:\Users\vboxuser
+λ reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+
+HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+    Microsoft Edge Update    REG_SZ    "C:\Users\vboxuser\AppData\Local\Microsoft\EdgeUpdate\1.3.315.17\MicrosoftEdgeUpdateCore.exe"
+    ZoomIt    REG_SZ    C:\Tools\sysinternals\ZoomIt64.exe
+
+C:\Users\vboxuser
+λ dir /a "%USERPROFILE%\Documents\maltrack"
+ Volume in drive C has no label.
+ Volume Serial Number is 8A9B-2277
+
+ Directory of C:\Users\vboxuser\Documents
+
+File Not Found
+
+C:\Users\vboxuser
+λ dir /a "%APPDATA%\dclogs"
+ Volume in drive C has no label.
+ Volume Serial Number is 8A9B-2277
+
+ Directory of C:\Users\vboxuser\AppData\Roaming
+
+File Not Found
+
+C:\Users\vboxuser
+λ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Userinit
+
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+    Userinit    REG_SZ    C:\Windows\system32\userinit.exe,
 ```
+
+The malware process is gone, the `Mal-Track` value is removed from the Run key (the other entries are untouched), the dropped `maltrack.exe` and its folder are deleted, and the `dclogs` folder is deleted.
 
 **Attacker Information:**
 
